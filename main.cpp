@@ -1,63 +1,28 @@
 #include <QCoreApplication>
-#include <QFile>
-#include <QFileInfo>
-#include <QDateTime>
-#include <QDebug>
-#include <iostream>
-#include <QThread>
-#include <QString>
-
-using namespace std;
-
-void checkFile(const QString& filePath) {
-    QFileInfo fileInfo(filePath);
-
-    if (fileInfo.exists()) {
-        qDebug() << "exist true, file size:" << fileInfo.size();
-
-        QDateTime lastModified = fileInfo.lastModified();
-        qDebug() << "Last modified:" << lastModified.toString();
-    } else {
-        qDebug() << "exist false";
-    }
-}
-
-istream& operator >>(std::istream& in, QString& str) {
-    std::string temp;
-    in >> temp;
-    str = QString::fromStdString(temp);
-    return in;
-}
-
-
+#include <QTextStream>
+#include "filewatcher.h"
+#include "fileobserver.h"
+#include <locale.h>
 int main(int argc, char *argv[])
 {
+    setlocale(LC_ALL,"rus");
+
     QCoreApplication a(argc, argv);
 
-    QStringList filesList;
+    QTextStream cin(stdin);
 
-    while (true) {
-        qDebug() << "Enter file path to add to watch list (or 'exit' to quit):";
-        QString filePath;
-        cin >> filePath;
+    FileWatcher watcher;
+    FileObserver observer;
 
-        if (filePath == "exit") {
-            break;
-        }
+    QObject::connect(&watcher, &FileWatcher::fileExists, &observer, &FileObserver::handleFileExists);
+    QObject::connect(&watcher, &FileWatcher::fileChanged, &observer, &FileObserver::handleFileChanged);
 
-        filesList.append(filePath);
-    }
+    QString filePath;
+    qDebug() << "Введите путь к файлу для отслеживания:";
 
-    qDebug() << "Watching files for changes...";
+    cin >> filePath;
 
-    while (true) {
-        for (const QString& filePath : filesList) {
-            checkFile(filePath);
-        }
-
-        QThread::sleep(1); // Check every 1 second
-    }
+    watcher.setFilePath(filePath);
 
     return a.exec();
 }
-
