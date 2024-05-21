@@ -1,28 +1,28 @@
 #include <QCoreApplication>
 #include <QTextStream>
 #include "filewatcher.h"
-#include "fileobserver.h"
+#include "Logger.h"
 #include <locale.h>
+#include <inputreader.h>
 int main(int argc, char *argv[])
 {
-    setlocale(LC_ALL,"rus");
+    setlocale(LC_ALL,"ru_RU.UTF-8");
 
     QCoreApplication a(argc, argv);
 
-    QTextStream cin(stdin);
+    InputReader InputReader;
+    FileWatcher FileWatcher; //созданы объекты класса
+    Logger Logger;
 
-    FileWatcher watcher;
-    FileObserver observer;
 
-    QObject::connect(&watcher, &FileWatcher::fileExists, &observer, &FileObserver::handleFileExists);
-    QObject::connect(&watcher, &FileWatcher::fileChanged, &observer, &FileObserver::handleFileChanged);
+    Logger.Input(1);
+    QString path = InputReader.ReadInput();
+    FileWatcher.initializationOfFile(path);
 
-    QString filePath;
-    qDebug() << "Введите путь к файлу для отслеживания:";
 
-    cin >> filePath;
 
-    watcher.setFilePath(filePath);
+
+
 
     return a.exec();
 }
