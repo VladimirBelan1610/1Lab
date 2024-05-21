@@ -21,7 +21,7 @@ void FileWatcher::initializationOfFile(const QString &filePath)
     m_timer.start(100); // Проверяем файл каждые 100 мс
 }
 
-int FileWatcher::checkFile()
+void FileWatcher::checkFile()
 {
 
 
@@ -55,7 +55,7 @@ int FileWatcher::checkFile()
        // return 4;
 
    // }
-    return 0;
+
 }
 
 

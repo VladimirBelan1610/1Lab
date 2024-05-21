@@ -14,7 +14,7 @@ class FileWatcher : public QObject
 public:
     FileWatcher(QObject *parent = nullptr); //Конструктор класса. Принимает указатель на родительский объект (по умолчанию nullptr).
     void initializationOfFile(const QString &filePath); //Метод для инициализации файла, который будет отслеживаться. Принимает путь к файлу.
-    int checkFile(); //Метод для проверки состояния файла (существует ли он, изменился ли и т.д.).
+    void checkFile(); //Метод для проверки состояния файла (существует ли он, изменился ли и т.д.).
     int GetSize(); // Метод для получения размера файла.
 
 signals:
