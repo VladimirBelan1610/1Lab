@@ -1,10 +1,15 @@
 #include "filewatcher.h"
 
-FileWatcher::FileWatcher(QObject *parent) : QObject(parent)
+FileWatcher::FileWatcher(QObject *parent) : QObject(parent) //Инициализирует объект FileWatcher. Он принимает указатель на родительский объект (по умолчанию nullptr).
 {
-    connect(&m_timer, &QTimer::timeout, this, &FileWatcher::checkFile);
-    connect(this, &FileWatcher::LoggerRequest,&Logger, &Logger::Output);
+    connect(&m_timer, &QTimer::timeout, this, &FileWatcher::checkFile); //Используется метод connect для подключения
+                                                                        //сигнала timeout от QTimer к методу checkFile.
+                                                                        //Это означает, что метод checkFile будет вызываться каждый раз,
+                                                                        //когда таймер сработает.
 
+    connect(this, &FileWatcher::LoggerRequest,&Logger, &Logger::Output);
+//Используется метод connect для подключения сигнала LoggerRequest к слоту Output объекта Logger.
+//Это означает, что при эмиссии сигнала LoggerRequest будет вызван метод Output у объекта Logger.
 }
 
 void FileWatcher::initializationOfFile(const QString &filePath)
@@ -20,24 +25,24 @@ int FileWatcher::checkFile()
 {
 
 
-    bool newexist = m_file.exists();
+    bool newexist = m_file.exists(); //получаем текущие данные о файле
     qint64 newSize = m_file.size();
     if (m_exist != newexist || newSize != m_fileSize)
     {
         if(newexist == m_exist){
             m_fileSize = newSize;
             emit LoggerRequest(4,m_fileSize, m_filePath);
-            return 4;
+
         }
         if (newexist == true && newSize != 0){
             m_exist = newexist;
             emit LoggerRequest(2,m_fileSize, m_filePath);
-            return 2;
+
         }
         if(newexist == false && newSize == 0){
             m_exist = newexist;
             emit LoggerRequest(5,m_fileSize, m_filePath);
-            return 5;
+
         }
 
 
@@ -54,6 +59,6 @@ int FileWatcher::checkFile()
 }
 
 
-int FileWatcher::GetSize(){
+int FileWatcher::GetSize(){ //геттер для размера файла
     return m_fileSize;
 };
