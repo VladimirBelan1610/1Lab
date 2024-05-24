@@ -1,64 +1,81 @@
 #include "filewatcher.h"
 
-FileWatcher::FileWatcher(QObject *parent) : QObject(parent) //Инициализирует объект FileWatcher. Он принимает указатель на родительский объект (по умолчанию nullptr).
-{
-    connect(&m_timer, &QTimer::timeout, this, &FileWatcher::checkFile); //Используется метод connect для подключения
-                                                                        //сигнала timeout от QTimer к методу checkFile.
-                                                                        //Это означает, что метод checkFile будет вызываться каждый раз,
-                                                                        //когда таймер сработает.
-
-    connect(this, &FileWatcher::LoggerRequest,&Logger, &Logger::Output);
-//Используется метод connect для подключения сигнала LoggerRequest к слоту Output объекта Logger.
-//Это означает, что при эмиссии сигнала LoggerRequest будет вызван метод Output у объекта Logger.
+// Конструктор класса FileWatcher
+FileWatcher::FileWatcher(QObject *parent) : QObject(parent) {
+    connect(&m_timer, &QTimer::timeout, this, &FileWatcher::checkFile);
 }
 
-void FileWatcher::initializationOfFile(const QString &filePath)
-{
-    m_filePath = filePath;
-    m_file.setFileName(m_filePath);
-    m_fileSize = m_file.size();
-    m_exist = m_file.exists();
-    m_timer.start(100); // Проверяем файл каждые 100 мс
+// Конструктор класса fileInform
+fileInform::fileInform(QString path) {
+    QFileInfo file(path);
+    exist = file.exists();
+    size = file.size();
 }
 
-void FileWatcher::checkFile()
-{
+// Метод check класса fileInform
+int fileInform::check(QString newpath) {
+    QFileInfo fileinfo(newpath);
+    int currsize = fileinfo.size();
+    bool currexist = fileinfo.exists();
 
-
-    bool newexist = m_file.exists(); //получаем текущие данные о файле
-    qint64 newSize = m_file.size();
-    if (m_exist != newexist || newSize != m_fileSize)
-    {
-        if(newexist == m_exist){
-            m_fileSize = newSize;
-            emit LoggerRequest(4,m_fileSize, m_filePath);
-
+    if (currexist != exist || currsize != size) {
+        if (!currexist && exist) {
+            exist = currexist;
+            size = currsize;
+            return 5; // Файл был удален
         }
-        if (newexist == true && newSize != 0){
-            m_exist = newexist;
-            emit LoggerRequest(2,m_fileSize, m_filePath);
-
+        if (currexist && !exist) {
+            exist = currexist;
+            size = currsize;
+            return 2; // Файл был создан
         }
-        if(newexist == false && newSize == 0){
-            m_exist = newexist;
-            emit LoggerRequest(5,m_fileSize, m_filePath);
-
-        }
-
-
+        if(currexist != exist || currsize != size){
+        exist = currexist;
+        size = currsize;
+        return 4;} // Изменился размер или существование файла
     }
 
-    //if (newSize != m_fileSize)
-    //{
-       //  m_fileSize = newSize;
-       // emit LoggerRequest(4,m_fileSize, m_filePath);
-       // return 4;
-
-   // }
-
+    return 0; // Нет изменений
 }
 
+// Метод инициализации файла в FileWatcher
+void FileWatcher::initializationOfFile(const QString &filePath) {
+    QFileInfo MN(filePath);
+    fileInform massCharacterFile(filePath);
+    massOfFiles.append(massCharacterFile);
+    massOfFiles2.append(MN);
+    m_timer.start(1000); // Проверяем файл каждые 1000 мс
+}
+// Метод проверки файла в FileWatcher
+void FileWatcher::checkFile() {
+    QTextStream out(stdout);
+    int n = massOfFiles.size();
+    for (int i = 0; i < n; i++) {
+        int result = massOfFiles[i].check(massOfFiles2[i].absoluteFilePath());
+        if (result == 2) {
+            massOfFiles2[i].refresh();
+            emit LoggerRequest(2, massOfFiles2[i].size(), massOfFiles2[i].absoluteFilePath());
+        } else if (result == 4) {
+            massOfFiles2[i].refresh();
+            emit LoggerRequest(4, massOfFiles2[i].size(), massOfFiles2[i].absoluteFilePath());
+        } else if (result == 5) {
+            massOfFiles2[i].refresh();
+            emit LoggerRequest(5, massOfFiles2[i].size(), massOfFiles2[i].absoluteFilePath());
+        }
+    }
+}
 
-int FileWatcher::GetSize(){ //геттер для размера файла
-    return m_fileSize;
-};
+// Геттер для размера файла
+int FileWatcher::GetSize(int i) {
+    return massOfFiles2[i].size();
+}
+
+// Геттер для размера массива
+int FileWatcher::GetSizeMass() {
+    return massOfFiles2.size();
+}
+
+// Геттер для пути файла
+QString FileWatcher::GetPath(int i) {
+    return massOfFiles2[i].absoluteFilePath();
+}

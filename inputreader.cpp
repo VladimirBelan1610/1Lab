@@ -1,9 +1,9 @@
 #include "inputreader.h"
 #include <QTextStream>
 InputReader::InputReader()
-{
+    {
 
-};
+    };
 
 QString InputReader::ReadInput()
 {

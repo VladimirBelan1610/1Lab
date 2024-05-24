@@ -6,6 +6,18 @@
 #include <QTimer>
 #include <QDebug>
 #include <Logger.h>
+#include <QFileInfo>
+
+
+class fileInform:public QFileInfo
+{
+private:
+    bool exist;
+    int size;
+public:
+    fileInform(QString path);
+    int check(QString file);
+};
 
 
 class FileWatcher : public QObject
@@ -15,8 +27,9 @@ public:
     FileWatcher(QObject *parent = nullptr); //Конструктор класса. Принимает указатель на родительский объект (по умолчанию nullptr).
     void initializationOfFile(const QString &filePath); //Метод для инициализации файла, который будет отслеживаться. Принимает путь к файлу.
     void checkFile(); //Метод для проверки состояния файла (существует ли он, изменился ли и т.д.).
-    int GetSize(); // Метод для получения размера файла.
-
+    int GetSize(int i); // Метод для получения размера файла.
+    int GetSizeMass();
+    QString GetPath(int i);
 signals:
     void fileExists(QString filePath, qint64 fileSize); //Сигнал, который эмитируется, когда файл существует. Передает путь к файлу и его размер.
     void fileChanged(QString filePath, qint64 fileSize); //Сигнал, который эмитируется, когда файл изменился. Передает путь к файлу и его размер.
@@ -29,6 +42,8 @@ private:
     QTimer m_timer; //Таймер для периодической проверки состояния файла.
     bool m_exist; //Логическая переменная, указывающая на существование файла.
     Logger Logger; //Объект класса Logger, используемый для ведения логов.
+    QVector<fileInform> massOfFiles;//Этот вектор будет использоваться для хранения информации о файлах в виде объектов fileInform.
+    QVector<QFileInfo> massOfFiles2; //вектор будет использоваться для хранения информации о файлах и каталогах в виде объектов QFileInfo.
 
 };
 

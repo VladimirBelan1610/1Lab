@@ -10,6 +10,9 @@ void Logger::Input(int q)
     case(1):
         cout << "Enter the file path\n";
         break;
+    case(2):
+        cout << "Enter number of files\n";
+        break;
     }
 
 }
@@ -18,7 +21,7 @@ void Logger::Output(int q, int fileSize, QString filePath)
     QTextStream out(stdout); //Потоковый вывод QT
     switch(q){
     case(2):
-        out << "File has been created\n";
+        out << "\nFile has been created\n" << filePath << " Size: "<< fileSize;
         out.flush();
         break;
     case(3):
